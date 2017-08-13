@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const { graphqlExpress, graphiqlExpress } = require('apollo-server-express');
 const expressJWT = require('express-jwt');
 const helmet = require('helmet');
+const crypto = require('crypto-js');
 const { sequelize, User, Token } = require('./db');
 const schema = require('./todo-schema');
 
@@ -48,6 +49,39 @@ app.post('/user/signup', urlencoded, (req, res)=>{
 		res.status(400).send(err.errors[0].type === 'unique violation' 
 			? err.errors[0].message : 'email is not formated correctly');
 	});
+});
+
+//route for logging user in and returning a token
+app.post('/user/login', urlencoded, (req, res)=>{
+	if(req.body.email
+		&& req.body.password.length
+		&& req.body.password.length >= 5){
+		User.findOne({
+			where: {
+				email: {
+					$eq: req.body.email
+				}
+			}
+		}).then( user => {
+			if(user == null)
+				res.status(401).json({message: 'user not found'});
+
+			let hash = crypto.SHA256(req.body.password+""+user.get('salt'));
+			if( user.get('pass_hash') ===  hash.toString()){
+				let token = user.genToken('authentication');
+				Token.create({
+					token,
+					userId: user.get('id')
+				}).then( ()=> res.status(200).send(token) )
+				.catch( err => res.status(500).send(err) );
+
+			}
+			else
+				throw new Error('incorrect password');
+		}).catch( err => res.status(400).json(err.message) );
+	}
+	else
+		res.status(400).send('incorrect email/password');
 });
 // -----------------------------------------------------------------------------
 

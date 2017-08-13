@@ -5,6 +5,7 @@ const expressJWT = require('express-jwt');
 const helmet = require('helmet');
 const crypto = require('crypto-js');
 const { sequelize, User, Token } = require('./db');
+const ATP = require("./authorizeToProceed.js")(User, Token);
 const schema = require('./todo-schema');
 
 const app = express();
@@ -23,6 +24,7 @@ app.use(expressJWT({secret: 'secret'}).unless({
 // function to be used by graphqlExpress middleware
 // to return 'options' object for graphQL configuration
 const graphqlOptions = req => {
+	// console.log(req.user);
 	return {
 		schema,
 		rootValue: { rootValue: 'rootValue' },
@@ -31,7 +33,7 @@ const graphqlOptions = req => {
 };
 
 // setting graphQL endpoint
-app.use('/gql', json, graphqlExpress(graphqlOptions));
+app.use('/gql', ATP, json, graphqlExpress(graphqlOptions));
 
 // setting graphiQL endpoint
 app.use('/giql', graphiqlExpress({ endpointURL: '/gql' }));
@@ -82,6 +84,22 @@ app.post('/user/login', urlencoded, (req, res)=>{
 	}
 	else
 		res.status(400).send('incorrect email/password');
+});
+
+// route for logging out a user
+app.get("/user/logout", ATP,(req,res)=>{
+	let token = req.headers.authorization.split(" ")[1];
+	let tokenHash = crypto.MD5(token).toString();
+	Token.destroy({
+		where:{
+			token_hash:{
+				$eq: tokenHash
+			}
+		}
+	}).then( token => {
+		console.log(token);
+		res.status(200).end();
+	}).catch( e => res.status(401).send(e) );
 });
 // -----------------------------------------------------------------------------
 

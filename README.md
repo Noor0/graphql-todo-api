@@ -11,3 +11,4 @@ used
 - easy-pbkdf2
 - apollo-express-server
 - graphql-tools
+- winston

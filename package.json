@@ -4,7 +4,7 @@
   "main": "server.js",
   "author": "Noor ul haq",
   "scripts": {
-    "start": "nodemon server.js --exec babel-node",
+    "start": "nodemon server.js"
   },
   "dependencies": {
     "apollo-server-express": "^1.0.5",

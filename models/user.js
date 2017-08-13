@@ -10,8 +10,10 @@ module.exports = (sequelize, DataTypes)=>{
 			unique: true,
 			validate: { isEmail:true }
 		},
+
 		pass_hash: DataTypes.STRING,
 		salt: DataTypes.STRING,
+
 		password:{
 			type: DataTypes.VIRTUAL,
 			allowNull: false,

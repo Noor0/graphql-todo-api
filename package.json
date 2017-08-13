@@ -1,11 +1,10 @@
 {
-  "name": "graphql-playground",
+  "name": "graphql-todo-api",
   "version": "1.0.0",
-  "main": "index.js",
-  "license": "MIT",
+  "main": "server.js",
+  "author": "Noor ul haq",
   "scripts": {
     "start": "nodemon server.js --exec babel-node",
-    "build": "babel server.js --out-file index.js"
   },
   "dependencies": {
     "apollo-server-express": "^1.0.5",

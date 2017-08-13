@@ -24,7 +24,6 @@ app.use(expressJWT({secret: 'secret'}).unless({
 // function to be used by graphqlExpress middleware
 // to return 'options' object for graphQL configuration
 const graphqlOptions = req => {
-	// console.log(req.user);
 	return {
 		schema,
 		rootValue: { rootValue: 'rootValue' },
@@ -35,8 +34,14 @@ const graphqlOptions = req => {
 // setting graphQL endpoint
 app.use('/gql', ATP, json, graphqlExpress(graphqlOptions));
 
+// options object for graphiql
+const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXlsb2FkIjoiVTJGc2RHVmtYMS9HMGdZMXY1YnBTU3JGNGRSVHJKZzMwcThEeXBqNUhhSExjS0VSQXR3TTdyNXNLdXM0UGRScW1SdTVNZ3Z3RSsvN0RsUi9NaWVmUkE9PSIsImlhdCI6MTUwMjYzODI3OX0.kHUAgY-7mmPdT2b57bRHZZ2-qnnDfpoWBqNXbpkq2RY';
+const options = {
+	endpointURL: '/gql',
+	passHeader: `'Authorization': 'Bearer ${token}'`
+}
 // setting graphiQL endpoint
-app.use('/giql', graphiqlExpress({ endpointURL: '/gql' }));
+app.use('/giql', graphiqlExpress(options));
 
 // -----------------------------------------------------------------------------
 // route for creating new user

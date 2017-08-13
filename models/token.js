@@ -1,4 +1,4 @@
-import crypto from 'crypto-js';
+const crypto = require('crypto-js');
 
 module.exports = (sequelize, DataTypes) => {
 	return sequelize.define("token",{

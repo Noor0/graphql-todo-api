@@ -7,11 +7,18 @@ const crypto = require('crypto-js');
 const { sequelize, User, Token } = require('./db');
 const ATP = require("./authorizeToProceed.js")(User, Token);
 const schema = require('./todo-schema');
+const logger = require('./setup-logger');
 
 const app = express();
 const port = process.env.PORT || 8080;
 const json = bodyParser.json();
 const urlencoded = bodyParser.urlencoded({ extended: true });
+const queryLogger = (req, res, next) => {
+	logger.query.info(`${req.connection.remoteAddress} queried`, {
+		query: req.body
+	});
+	next();
+}
 
 // setting security middleware
 app.use(helmet());
@@ -26,13 +33,13 @@ app.use(expressJWT({secret: 'secret'}).unless({
 const graphqlOptions = req => {
 	return {
 		schema,
-		rootValue: { rootValue: 'rootValue' },
+		formatError: (e) => (logger.normal.error(e), e),
 		context: req.user
 	}
 };
 
 // setting graphQL endpoint
-app.use('/gql', ATP, json, graphqlExpress(graphqlOptions));
+app.use('/gql', ATP, json, queryLogger, graphqlExpress(graphqlOptions));
 
 // options object for graphiql
 const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXlsb2FkIjoiVTJGc2RHVmtYMS9HMGdZMXY1YnBTU3JGNGRSVHJKZzMwcThEeXBqNUhhSExjS0VSQXR3TTdyNXNLdXM0UGRScW1SdTVNZ3Z3RSsvN0RsUi9NaWVmUkE9PSIsImlhdCI6MTUwMjYzODI3OX0.kHUAgY-7mmPdT2b57bRHZZ2-qnnDfpoWBqNXbpkq2RY';
@@ -109,5 +116,8 @@ app.get("/user/logout", ATP,(req,res)=>{
 // -----------------------------------------------------------------------------
 
 sequelize.sync().then(()=>{
-	app.listen(port, () => { console.log('server started') });
+	app.listen(port, () => { console.log('server started') })
+	.on('connection', (socket) => {
+		logger.normal.info(`${socket.remoteAddress} connected`);
+	});
 });

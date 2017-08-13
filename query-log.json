@@ -1,0 +1,1 @@
+{"query":{"query":"query getAllTodos($status:Boolean, $search: String) {\n  todos(status: $status, search: $search){\n    id\n    userId\n    text\n    status\n  }\n}\n","variables":{"search":""},"operationName":"getAllTodos"},"level":"info","message":"::1 queried","timestamp":"2017-08-13T18:46:42.570Z"}
